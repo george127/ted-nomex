@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://ted-nomex-api.onrender.com/api/:path*"
+    }
+  ]
+}
