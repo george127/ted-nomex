@@ -4,6 +4,7 @@ const backendUrl =
   process.env.BACKEND_PROXY_URL ?? "https://ted-nomex-api.onrender.com";
 
 const nextConfig: NextConfig = {
+  cacheComponents: true,
   async rewrites() {
     return [
       {
