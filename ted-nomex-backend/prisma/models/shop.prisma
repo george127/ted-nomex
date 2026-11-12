@@ -1,0 +1,82 @@
+// Bounded context: shop — owns Product, Order, OrderItem
+
+model Product {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String   @db.Text
+  price       Decimal  @db.Decimal(12, 2)
+  currency    String   @default("GHS")
+  stock       Int      @default(0)
+  images      String[]
+  category    String?
+  published   Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orderItems OrderItem[]
+
+  @@index([published, category])
+  @@index([slug])
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  userId        String?
+  email         String
+  status        OrderStatus @default(PENDING)
+  currency      String      @default("GHS")
+  subtotal      Decimal     @db.Decimal(12, 2)
+  total         Decimal     @db.Decimal(12, 2)
+
+  stripeSession   String?
+  stripePaymentId String?
+  paypalOrderId   String?
+  paymentStatus   String  @default("PENDING")
+  cardLast4       String?
+  cardBrand       String?
+
+  shippingName    String?
+  shippingAddress String?
+  shippingCity    String?
+  shippingRegion  String?
+  shippingCountry String?
+  shippingNotes   String? @db.Text
+
+  user  User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([email])
+  @@index([stripeSession])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String?
+
+  title    String
+  price    Decimal @db.Decimal(12, 2)
+  quantity Int
+  image    String?
+
+  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  FULFILLED
+  CANCELLED
+  REFUNDED
+}

@@ -1,0 +1,422 @@
+/* ==========================================================================
+   TEAM SLIDER + MODAL
+   Self-contained (no dependency on base.css vars).
+   Also includes the slider/card styles — you can delete the old
+   .team-slider / .team-card block from about.css if you want to avoid
+   duplication, or leave it — the rules are identical and won't conflict.
+   ========================================================================== */
+
+/* ── Slider shell ─────────────────────────────────────────── */
+.team-slider {
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+.team-slider-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.team-slider-arrow {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid #e2e8e3;
+  background: #ffffff;
+  color: #091c13;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 200ms, border-color 200ms, color 200ms, transform 200ms;
+}
+.team-slider-arrow:hover:not(:disabled) {
+  background: #4ade80;
+  border-color: #4ade80;
+  color: #091c13;
+  transform: translateY(-2px);
+}
+.team-slider-arrow:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.team-slider-arrow .material-symbols-outlined { font-size: 20px; }
+
+.team-slider-track {
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  padding-bottom: 20px;
+  scrollbar-width: none;
+}
+.team-slider-track::-webkit-scrollbar { display: none; }
+
+.team-card {
+  flex: 0 0 calc((100% - 48px) / 3);
+  scroll-snap-align: start;
+  background: #ffffff;
+  border: 1px solid #e2e8e3;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 400ms cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 400ms ease, border-color 400ms ease;
+  display: flex;
+  flex-direction: column;
+}
+.team-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 32px 64px -20px rgba(9, 28, 19, 0.18);
+  border-color: rgba(26, 138, 99, 0.25);
+}
+.team-card-clickable { cursor: pointer; }
+.team-card-clickable:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.35),
+              0 32px 64px -20px rgba(9, 28, 19, 0.18);
+}
+
+.team-card-image {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background-size: cover;
+  background-position: center;
+  background-color: #f4f7f5;
+  overflow: hidden;
+}
+.team-card-image::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(9, 28, 19, 0.55) 100%);
+  z-index: 1;
+  transition: background 400ms ease;
+}
+.team-card:hover .team-card-image::before {
+  background: linear-gradient(180deg, transparent 20%, rgba(9, 28, 19, 0.7) 100%);
+}
+.team-card-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+.team-card:hover .team-card-overlay { opacity: 1; }
+.team-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: #4ade80;
+  color: #091c13;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  border-radius: 4px;
+  text-decoration: none;
+  box-shadow: 0 12px 24px -8px rgba(74, 222, 128, 0.6);
+  transform: translateY(10px);
+  transition: transform 300ms ease, background 200ms ease;
+}
+.team-card:hover .team-card-cta { transform: translateY(0); }
+.team-card-cta .material-symbols-outlined { font-size: 14px; }
+.team-card-num {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+  background: #e6f4ee;
+  color: #1a8a63;
+  padding: 6px 10px;
+  font-size: 10px;
+  font-weight: 800;
+  border-radius: 4px;
+  letter-spacing: 0.6px;
+}
+.team-card-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+.team-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.team-card-name {
+  font-size: 17px;
+  font-weight: 800;
+  color: #091c13;
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+.team-role-pill {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #1a8a63;
+  background: #e6f4ee;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.team-card-desc {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #5b6f66;
+  margin: 0;
+}
+.team-slider-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+}
+.team-slider-dot {
+  width: 24px;
+  height: 4px;
+  border-radius: 2px;
+  border: none;
+  background: #e2e8e3;
+  cursor: pointer;
+  transition: background 200ms, width 200ms;
+}
+.team-slider-dot.active {
+  background: #4ade80;
+  width: 40px;
+}
+
+/* ── Modal backdrop ──────────────────────────────────────── */
+.team-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(5, 15, 9, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: teamFadeIn 200ms ease-out;
+}
+
+/* ── Modal shell ─────────────────────────────────────────── */
+.team-modal {
+  position: relative;
+  width: 100%;
+  max-width: 820px;
+  max-height: 90vh;
+  background: #ffffff;
+  border-radius: 10px;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.5);
+  animation: teamModalIn 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── Modal image ─────────────────────────────────────────── */
+.team-modal-image {
+  position: relative;
+  background-size: cover;
+  background-position: center top;
+  background-color: #091c13;
+  min-height: 100%;
+}
+.team-modal-image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+    rgba(5, 15, 9, 0) 0%,
+    rgba(5, 15, 9, 0.15) 60%,
+    rgba(5, 15, 9, 0.55) 100%);
+  pointer-events: none;
+}
+.team-modal-num {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 2;
+  background: rgba(74, 222, 128, 0.95);
+  color: #091c13;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  border-radius: 4px;
+}
+
+/* ── Modal body ──────────────────────────────────────────── */
+.team-modal-body {
+  padding: 40px 36px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.team-modal-role {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 5px 12px;
+  background: #e6f4ee;
+  color: #1a8a63;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  border-radius: 999px;
+}
+.team-modal-name {
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 900;
+  color: #091c13;
+  letter-spacing: -1px;
+  line-height: 1.1;
+  margin: 0;
+}
+.team-modal-bio {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 4px;
+}
+.team-modal-bio p {
+  font-size: 14px;
+  line-height: 1.75;
+  color: #5b6f66;
+  margin: 0;
+}
+
+/* ── Modal footer ────────────────────────────────────────── */
+.team-modal-foot {
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8e3;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.team-modal-foot p {
+  font-size: 13px;
+  font-weight: 600;
+  color: #5b6f66;
+  margin: 0;
+}
+.team-modal-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  background: #4ade80;
+  color: #091c13;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  text-decoration: none;
+  box-shadow: 0 12px 32px -10px rgba(74, 222, 128, 0.6);
+  transition: background 200ms ease, transform 200ms ease, gap 200ms ease;
+}
+.team-modal-cta:hover {
+  background: #22c55e;
+  transform: translateY(-1px);
+  gap: 12px;
+}
+.team-modal-cta .material-symbols-outlined { font-size: 16px; }
+
+/* ── Close button ────────────────────────────────────────── */
+.team-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 3;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.95);
+  color: #091c13;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: background 200ms, color 200ms, transform 200ms;
+}
+.team-modal-close:hover {
+  background: #091c13;
+  color: #ffffff;
+  transform: rotate(90deg);
+}
+.team-modal-close .material-symbols-outlined { font-size: 20px; }
+
+/* ── Keyframes ───────────────────────────────────────────── */
+@keyframes teamFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes teamModalIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 1199px) {
+  .team-card { flex-basis: calc((100% - 24px) / 2); }
+}
+@media (max-width: 767px) {
+  .team-slider-controls { justify-content: center; }
+  .team-card { flex-basis: 100%; }
+  .team-card-body { padding: 20px; }
+  .team-card-name { font-size: 16px; }
+
+  .team-modal {
+    grid-template-columns: 1fr;
+    max-height: 92vh;
+  }
+  .team-modal-image {
+    min-height: 220px;
+    aspect-ratio: 16 / 9;
+  }
+  .team-modal-body {
+    padding: 28px 24px;
+  }
+  .team-modal-name {
+    font-size: 24px;
+  }
+  .team-modal-foot {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .team-modal-cta { justify-content: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .team-modal-backdrop,
+  .team-modal,
+  .team-card,
+  .team-card-cta,
+  .team-modal-close,
+  .team-modal-cta {
+    animation: none !important;
+    transition: none !important;
+  }
+}

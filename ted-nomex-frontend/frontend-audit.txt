@@ -1,0 +1,232 @@
+﻿============================================================
+ FRONTEND AUDIT — 2026-11-12 11:27:53
+============================================================
+
+=== 1. PACKAGE.JSON ===
+{
+  "name": "ted-nomex-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "16.4.5",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.43",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "babel-plugin-react-compiler": "1.0.0",
+    "typescript": "^5"
+  }
+}
+
+
+=== 2. NEXT.CONFIG ===
+--- next.config.ts ---
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  /* config options here */
+  cacheComponents: true,
+  partialPrefetching: true,
+  reactCompiler: true,
+};
+
+export default nextConfig;
+
+
+=== 3. ENV FILES PRESENT ===
+  .env.example  (84 bytes)
+  .env.local  (114 bytes)
+
+=== 4. ENV KEYS (values redacted) ===
+--- .env.example ---
+  NEXT_PUBLIC_API_URL=<redacted>
+  NEXT_PUBLIC_SITE_URL=<redacted>
+--- .env.local ---
+  NEXT_PUBLIC_API_URL=<redacted>
+  NEXT_PUBLIC_SITE_URL=<redacted>
+  NEXT_PUBLIC_USE_MOCK=<redacted>
+
+=== 5. ALL NEXT_PUBLIC_* USAGES ===
+  app\(admin)\admin\estate\page.tsx:6  NEXT_PUBLIC_API_URL
+  app\(admin)\admin\news\page.tsx:6  NEXT_PUBLIC_API_URL
+  app\(admin)\admin\products\page.tsx:6  NEXT_PUBLIC_API_URL
+  app\(admin)\admin\services\page.tsx:6  NEXT_PUBLIC_API_URL
+  app\(dashboard)\dashboard\enquiries\page.tsx:5  NEXT_PUBLIC_API_URL
+  app\(dashboard)\dashboard\orders\page.tsx:5  NEXT_PUBLIC_API_URL
+  app\(dashboard)\dashboard\quotes\page.tsx:5  NEXT_PUBLIC_API_URL
+  app\(dashboard)\dashboard\page.tsx:4  NEXT_PUBLIC_API_URL
+  app\(marketing)\checkout\page.tsx:9  NEXT_PUBLIC_API_URL
+  app\(marketing)\contact\page.tsx:7  NEXT_PUBLIC_API_URL
+  app\(marketing)\cost\page.tsx:6  NEXT_PUBLIC_API_URL
+  modules\auth\session.ts:16  NEXT_PUBLIC_API_URL
+  lib\admin.ts:3  NEXT_PUBLIC_API_URL
+  lib\api-client.ts:20  NEXT_PUBLIC_API_URL
+  lib\env.ts:10  NEXT_PUBLIC_API_URL
+  lib\env.ts:11  NEXT_PUBLIC_SITE_URL
+  lib\env.ts:12  NEXT_PUBLIC_USE_MOCK
+
+=== 6. API CLIENT (lib/api-client.ts) ===
+import { env } from "./env";
+
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public status: number,
+    public body?: unknown,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
+type RequestOptions = Omit<RequestInit, "body"> & { body?: unknown };
+
+export async function apiFetch<T>(
+  path: string,
+  options: RequestOptions = {},
+): Promise<T> {
+  const url = `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000"}${path}`;
+
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers ?? {}),
+    },
+    body: options.body ? JSON.stringify(options.body) : undefined,
+    credentials: "include",
+  });
+
+  const text = await res.text();
+  const data = text ? safeJson(text) : null;
+
+  if (!res.ok) {
+    throw new ApiError(
+      (data as { message?: string })?.message ??
+        `Request failed: ${res.status}`,
+      res.status,
+      data,
+    );
+  }
+
+  return data as T;
+}
+
+function safeJson(text: string): unknown {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
+}
+
+
+=== 7. HARDCODED localhost REFERENCES ===
+  app\(admin)\admin\estate\page.tsx:6  const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+  app\(admin)\admin\news\page.tsx:6  const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+  app\(admin)\admin\products\page.tsx:6  const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+  app\(admin)\admin\services\page.tsx:6  const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+  app\(dashboard)\dashboard\enquiries\page.tsx:5  const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+  app\(dashboard)\dashboard\orders\page.tsx:5  const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+  app\(dashboard)\dashboard\quotes\page.tsx:5  const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+  app\(dashboard)\dashboard\page.tsx:4  const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+  app\(marketing)\checkout\page.tsx:9  const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+  app\(marketing)\contact\page.tsx:7  const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+  app\(marketing)\cost\page.tsx:6  const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+  modules\auth\session.ts:16  const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+  lib\admin.ts:3  const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+  lib\api-client.ts:20  const url = `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000"}${path}`;
+
+=== 8. AUTH COOKIE / SESSION CALLS ===
+  app\(admin)\admin\estate\page.tsx:39  method, credentials: "include",
+  app\(admin)\admin\estate\page.tsx:51  method: "POST", credentials: "include",
+  app\(admin)\admin\estate\page.tsx:132  const res = await fetch(`${API}/api/estate/admin/all`, { credentials: "include" });
+  app\(admin)\admin\news\page.tsx:29  method, credentials: "include",
+  app\(admin)\admin\news\page.tsx:41  method: "POST", credentials: "include",
+  app\(admin)\admin\news\page.tsx:130  const res = await fetch(`${API}/api/cms/news/admin/all?published=all`, { credentials: "include" });
+  app\(admin)\admin\products\page.tsx:30  method, credentials: "include",
+  app\(admin)\admin\products\page.tsx:42  method: "POST", credentials: "include",
+  app\(admin)\admin\products\page.tsx:123  const res = await fetch(`${API}/api/shop/products/admin/all`, { credentials: "include" });
+  app\(admin)\admin\services\page.tsx:34  method, credentials: "include",
+  app\(admin)\admin\services\page.tsx:46  method: "POST", credentials: "include",
+  app\(admin)\admin\services\page.tsx:124  const res = await fetch(`${API}/api/cms/services/admin/all`, { credentials: "include" });
+  app\(dashboard)\dashboard\enquiries\page.tsx:9  const store = await cookies();
+  app\(dashboard)\dashboard\orders\page.tsx:9  const store = await cookies();
+  app\(dashboard)\dashboard\quotes\page.tsx:9  const store = await cookies();
+  app\(dashboard)\dashboard\page.tsx:8  const store = await cookies();
+  app\(marketing)\checkout\page.tsx:50  credentials: "include",
+  app\(marketing)\contact\page.tsx:31  credentials: "include",
+  app\(marketing)\cost\page.tsx:64  credentials: "include",
+  modules\auth\session.ts:43  * On the client: normal fetch with credentials: "include".
+  modules\auth\session.ts:54  const store = await cookies(); // async in Next 15/16
+  modules\auth\session.ts:61  credentials: isServer ? "omit" : "include",
+  modules\auth\session.ts:78  credentials: "include",
+  modules\auth\session.ts:96  credentials: "include",
+  modules\auth\session.ts:110  credentials: "include",
+  modules\auth\session.ts:130  credentials: "include",
+  modules\auth\session.ts:145  credentials: "include",
+  modules\auth\session.ts:155  credentials: "include",
+  lib\admin.ts:8  // On the server (Server Component / layout), credentials:"include" does
+  lib\admin.ts:16  const store = await cookies(); // async in Next.js 15+
+
+=== 9. GOOGLE OAUTH / STRIPE CALLBACK URLS ===
+  app\(auth)\login\page.tsx:6  import { login, getGoogleAuthUrl } from "@/modules/auth/session";
+  app\(auth)\login\page.tsx:69  <a href={getGoogleAuthUrl()} className="auth-google">
+  app\(auth)\register\page.tsx:6  import { register, getGoogleAuthUrl } from "@/modules/auth/session";
+  app\(auth)\register\page.tsx:101  <a href={getGoogleAuthUrl()} className="auth-google">
+  modules\auth\session.ts:117  export function getGoogleAuthUrl(): string {
+
+=== 10. ROUTES THAT FETCH FROM BACKEND ===
+  app\(admin)\admin\estate\page.tsx:38  const res = await fetch(`${API}${path}`, {
+  app\(admin)\admin\estate\page.tsx:50  const signRes = await fetch(`${API}/api/media/sign`, {
+  app\(admin)\admin\estate\page.tsx:66  const up = await fetch(`https://api.cloudinary.com/v1_1/${sig.cloudName}/image/upload`, { method: "POST", body: form });
+  app\(admin)\admin\estate\page.tsx:132  const res = await fetch(`${API}/api/estate/admin/all`, { credentials: "include" });
+  app\(admin)\admin\news\page.tsx:28  const res = await fetch(`${API}${path}`, {
+  app\(admin)\admin\news\page.tsx:40  const signRes = await fetch(`${API}/api/media/sign`, {
+  app\(admin)\admin\news\page.tsx:56  const up = await fetch(
+  app\(admin)\admin\news\page.tsx:130  const res = await fetch(`${API}/api/cms/news/admin/all?published=all`, { credentials: "include" });
+  app\(admin)\admin\products\page.tsx:29  const res = await fetch(`${API}${path}`, {
+  app\(admin)\admin\products\page.tsx:41  const signRes = await fetch(`${API}/api/media/sign`, {
+  app\(admin)\admin\products\page.tsx:57  const up = await fetch(`https://api.cloudinary.com/v1_1/${sig.cloudName}/image/upload`, { method: "POST", body: form });
+  app\(admin)\admin\products\page.tsx:123  const res = await fetch(`${API}/api/shop/products/admin/all`, { credentials: "include" });
+  app\(admin)\admin\services\page.tsx:33  const res = await fetch(`${API}${path}`, {
+  app\(admin)\admin\services\page.tsx:45  const signRes = await fetch(`${API}/api/media/sign`, {
+  app\(admin)\admin\services\page.tsx:61  const up = await fetch(`https://api.cloudinary.com/v1_1/${sig.cloudName}/image/upload`, { method: "POST", body: form });
+  app\(admin)\admin\services\page.tsx:124  const res = await fetch(`${API}/api/cms/services/admin/all`, { credentials: "include" });
+  app\(dashboard)\dashboard\enquiries\page.tsx:11  const res = await fetch(`${API}${path}`, {
+  app\(dashboard)\dashboard\orders\page.tsx:11  const res = await fetch(`${API}${path}`, {
+  app\(dashboard)\dashboard\quotes\page.tsx:11  const res = await fetch(`${API}${path}`, {
+  app\(dashboard)\dashboard\page.tsx:10  const res = await fetch(`${API}${path}`, {
+  app\(marketing)\checkout\page.tsx:47  const res = await fetch(`${API}/api/checkout`, {
+  app\(marketing)\contact\page.tsx:29  const res = await fetch(`${API}/api/enquiries`, {
+  app\(marketing)\cost\page.tsx:62  const res = await fetch(`${API}/api/quotes`, {
+  app\(marketing)\estate\[id]\page.tsx:3  import { getProperty, listProperties } from "@/modules/estate/service";
+  app\(marketing)\estate\[id]\page.tsx:16  let related: Awaited<ReturnType<typeof listProperties>> = [];
+  app\(marketing)\estate\[id]\page.tsx:18  const all = await listProperties();
+  app\(marketing)\estate\page.tsx:5  import { listProperties } from "@/modules/estate/service";
+  app\(marketing)\estate\page.tsx:8  type Property = Awaited<ReturnType<typeof listProperties>>[number];
+  app\(marketing)\estate\page.tsx:28  const data = await listProperties();
+  app\(marketing)\news\[slug]\page.tsx:5  import { getNews, listNews } from "@/modules/cms/news/service";
+  app\(marketing)\news\[slug]\page.tsx:18  const all = await listNews();
+  app\(marketing)\news\[slug]\page.tsx:28  let related: Awaited<ReturnType<typeof listNews>> = [];
+  app\(marketing)\news\[slug]\page.tsx:30  const all = await listNews();
+  app\(marketing)\news\page.tsx:3  import { listNews } from "@/modules/cms/news/service";
+  app\(marketing)\news\page.tsx:9  const news = await listNews();
+  app\(marketing)\services\[slug]\page.tsx:5  import { getService, listServices } from "@/modules/cms/services/service";
+  app\(marketing)\services\[slug]\page.tsx:25  const all = await listServices();
+  app\(marketing)\services\page.tsx:3  import { listServices } from "@/modules/cms/services/service";
+  app\(marketing)\services\page.tsx:9  const services = await listServices();
+  modules\api\auth.ts:1  import { apiFetch } from "@/lib/api-client";
+
+=== 11. VERSION ===
+node: v24.11.1
+npm:  11.21.1

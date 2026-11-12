@@ -1,0 +1,50 @@
+// Bounded context: leads — owns Quote, Enquiry
+
+model Quote {
+  id       String  @id @default(cuid())
+  userId   String?
+  name     String
+  email    String
+  phone    String?
+
+  inputs   Json
+  estimate Decimal      @db.Decimal(12, 2)
+  currency String       @default("GHS")
+  status   QuoteStatus  @default(NEW)
+  notes    String?      @db.Text
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([email])
+}
+
+enum QuoteStatus {
+  NEW
+  CONTACTED
+  CONVERTED
+  CLOSED
+}
+
+model Enquiry {
+  id      String  @id @default(cuid())
+  userId  String?
+  name    String
+  email   String
+  phone   String?
+  subject String?
+  message String  @db.Text
+  handled Boolean @default(false)
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([handled])
+  @@index([email])
+}

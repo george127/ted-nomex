@@ -1,0 +1,30 @@
+// Bounded context: estate — owns Property
+
+model Property {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @db.Text
+  price       Decimal  @db.Decimal(12, 2)
+  currency    String   @default("GHS")
+  status      String
+  location    String
+  type        String
+  style       String?
+  rooms       Int
+  bedrooms    Int
+  bathrooms   Int
+  parking     Int
+  area        Int
+  images      String[]
+  amenities   String[]
+  options     String[]
+  published   Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published, status])
+  @@index([location])
+  @@index([type])
+  @@index([price])
+}

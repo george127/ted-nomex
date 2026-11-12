@@ -1,0 +1,24 @@
+# Dependencies
+**/node_modules/
+
+# Builds
+**/dist/
+**/.next/
+**/out/
+
+# Env files — never commit
+**/.env
+**/.env.local
+**/.env*.local
+
+# Prisma generated client
+**/node_modules/.prisma
+**/node_modules/@prisma
+
+# Logs
+**/*.log
+**/npm-debug.log*
+
+# OS
+**/.DS_Store
+Thumbs.db

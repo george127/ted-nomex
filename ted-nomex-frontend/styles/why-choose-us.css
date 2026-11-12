@@ -1,0 +1,433 @@
+/* ==========================================================================
+   WHY CHOOSE US — cards + modal
+   Self-contained. Includes the bento-grid card styles (previously in
+   marketing.css) AND the new modal styles. No dependency on base.css.
+   ========================================================================== */
+
+/* ==========================================================================
+   SECTION WRAPPER
+   ========================================================================== */
+.chooseUs-container {
+  position: relative;
+  padding-bottom: 130px;
+  background: #f4f7f5;
+  overflow: hidden;
+}
+.chooseUs-container .image {
+  position: absolute;
+  bottom: -80px;
+  left: -100px;
+  width: 500px;
+  height: 500px;
+  opacity: 0.3;
+  filter: grayscale(100%);
+  transform: rotate(12deg);
+  pointer-events: none;
+}
+.chooseUs-container .container {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 60px;
+}
+
+/* ==========================================================================
+   HEADER
+   ========================================================================== */
+.chooseUs-container .text-container {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto;
+}
+.chooseUs-container .text-container p:first-child {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  color: #4ade80;
+  margin: 0 0 12px;
+}
+.chooseUs-container .text-container h2 {
+  font-size: clamp(36px, 4.5vw, 56px);
+  margin: 0 0 20px;
+  color: #091c13;
+  letter-spacing: -1.5px;
+  line-height: 1;
+  font-weight: 900;
+}
+.chooseUs-container .text-container > span {
+  display: inline-block;
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(135deg, #1a8a63 0%, #0f5236 100%);
+  border-radius: 2px;
+  margin: 0 0 24px;
+}
+.chooseUs-container .text-container p {
+  font-size: 15px;
+  color: #5b6f66;
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ==========================================================================
+   CARD GRID
+   ========================================================================== */
+.chooseUs-container .Button-container .buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+.chooseUs-container .Button-container .buttons .item {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #e2e8e3;
+  border-radius: 10px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  cursor: pointer;
+  transition:
+    transform 400ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 400ms ease,
+    border-color 400ms ease;
+  overflow: hidden;
+}
+.chooseUs-container .Button-container .buttons .item:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 32px 64px -24px rgba(9, 28, 19, 0.2);
+  border-color: rgba(26, 138, 99, 0.25);
+}
+.chooseUs-container .Button-container .buttons .item .list {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  flex: 1;
+}
+.chooseUs-container .Button-container .buttons .item .list .icon {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1a8a63 0%, #0f5236 100%);
+  color: #ffffff;
+  border-radius: 6px;
+  font-size: 24px;
+  transition:
+    transform 400ms ease,
+    background 400ms ease,
+    color 400ms ease;
+  box-shadow: 0 8px 20px -6px rgba(26, 138, 99, 0.4);
+}
+.chooseUs-container .Button-container .buttons .item:hover .list .icon {
+  transform: scale(1.05) rotate(-6deg);
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+  color: #091c13;
+}
+.chooseUs-container .Button-container .buttons .item .list .Text h5 {
+  font-size: 17px;
+  font-weight: 800;
+  color: #091c13;
+  margin: 0 0 8px;
+  letter-spacing: -0.2px;
+}
+.chooseUs-container .Button-container .buttons .item .list .Text p {
+  font-size: 13px;
+  color: #5b6f66;
+  line-height: 1.55;
+  margin: 0 0 12px;
+}
+.chooseUs-container .Button-container .buttons .item .list .Text .link {
+  color: #1a8a63;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  font-size: 10px;
+  cursor: pointer;
+  transition: color 200ms ease, letter-spacing 200ms ease;
+}
+.chooseUs-container .Button-container .buttons .item .list .Text .link:hover {
+  color: #22c55e;
+  letter-spacing: 1.6px;
+}
+.chooseUs-container .Button-container .buttons .item .num {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+.chooseUs-container .Button-container .buttons .item .num p {
+  background: #e6f4ee;
+  color: #1a8a63;
+  padding: 6px 10px;
+  font-size: 10px;
+  font-weight: 800;
+  border-radius: 4px;
+  margin: 0;
+  letter-spacing: 0.6px;
+}
+
+/* ==========================================================================
+   CARD AFFORDANCE (clickable wrapper)
+   ========================================================================== */
+.why-card-clickable {
+  cursor: pointer;
+}
+.why-card-clickable:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgba(74, 222, 128, 0.35),
+    0 32px 64px -24px rgba(9, 28, 19, 0.2);
+}
+
+/* ==========================================================================
+   MODAL — BACKDROP
+   ========================================================================== */
+.why-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(5, 15, 9, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: whyFadeIn 200ms ease-out;
+}
+
+/* ==========================================================================
+   MODAL — SHELL
+   ========================================================================== */
+.why-modal {
+  position: relative;
+  width: 100%;
+  max-width: 720px;
+  max-height: 90vh;
+  background: #ffffff;
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.5);
+  animation: whyModalIn 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ==========================================================================
+   MODAL — HEADER
+   ========================================================================== */
+.why-modal-header {
+  padding: 32px 32px 24px;
+  background: linear-gradient(135deg, #091c13, #050f09);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.why-modal-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #4ade80, #22c55e);
+  color: #091c13;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 12px 24px -8px rgba(74, 222, 128, 0.5);
+}
+.why-modal-icon .material-symbols-outlined {
+  font-size: 32px;
+}
+.why-modal-kicker {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #4ade80;
+  margin: 0 0 6px;
+}
+.why-modal-title {
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: -0.8px;
+  margin: 0;
+  color: #ffffff;
+  line-height: 1.1;
+}
+
+/* ==========================================================================
+   MODAL — BODY
+   ========================================================================== */
+.why-modal-body {
+  padding: 28px 32px 32px;
+  overflow-y: auto;
+  flex: 1;
+}
+.why-modal-body p {
+  font-size: 15px;
+  line-height: 1.8;
+  color: #5b6f66;
+  margin: 0;
+}
+.why-modal-body p + p {
+  margin-top: 16px;
+}
+
+/* ==========================================================================
+   MODAL — FOOTER
+   ========================================================================== */
+.why-modal-foot {
+  padding: 20px 32px;
+  border-top: 1px solid #e2e8e3;
+  background: #f4f7f5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.why-modal-foot p {
+  font-size: 13px;
+  color: #5b6f66;
+  margin: 0;
+  font-weight: 600;
+}
+.why-modal-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  background: #4ade80;
+  color: #091c13;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  text-decoration: none;
+  box-shadow: 0 12px 32px -10px rgba(74, 222, 128, 0.6);
+  transition: background 200ms ease, transform 200ms ease, gap 200ms ease;
+}
+.why-modal-cta:hover {
+  background: #22c55e;
+  transform: translateY(-1px);
+  gap: 12px;
+}
+.why-modal-cta .material-symbols-outlined {
+  font-size: 16px;
+}
+
+/* ==========================================================================
+   MODAL — CLOSE BUTTON
+   ========================================================================== */
+.why-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 3;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  color: #091c13;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: background 200ms, color 200ms, transform 200ms;
+}
+.why-modal-close:hover {
+  background: #091c13;
+  color: #ffffff;
+  transform: rotate(90deg);
+}
+.why-modal-close .material-symbols-outlined {
+  font-size: 20px;
+}
+
+/* ==========================================================================
+   KEYFRAMES
+   ========================================================================== */
+@keyframes whyFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes whyModalIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+@media (max-width: 991px) {
+  .chooseUs-container .Button-container .buttons {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .chooseUs-container {
+    padding-bottom: 80px;
+  }
+  .chooseUs-container .Button-container .buttons .item {
+    padding: 24px;
+  }
+  .chooseUs-container .text-container h2 {
+    font-size: 32px;
+  }
+
+  .why-modal-header {
+    padding: 24px 24px 20px;
+    gap: 14px;
+  }
+  .why-modal-icon {
+    width: 52px;
+    height: 52px;
+  }
+  .why-modal-icon .material-symbols-outlined {
+    font-size: 26px;
+  }
+  .why-modal-title {
+    font-size: 22px;
+  }
+  .why-modal-body {
+    padding: 22px 24px 24px;
+  }
+  .why-modal-foot {
+    padding: 16px 24px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .why-modal-cta {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .chooseUs-container .Button-container .buttons .item .list {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .why-modal-backdrop,
+  .why-modal,
+  .why-card-clickable,
+  .why-modal-close,
+  .why-modal-cta,
+  .chooseUs-container .Button-container .buttons .item,
+  .chooseUs-container .Button-container .buttons .item .list .icon {
+    animation: none !important;
+    transition: none !important;
+  }
+}
