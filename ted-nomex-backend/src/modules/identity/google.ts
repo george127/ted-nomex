@@ -8,8 +8,8 @@ if (!env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET) {
   );
 }
 
-const REDIRECT_URI = "http://localhost:4000/api/auth/google/callback";
-
+const REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI
+  ?? "http://localhost:4000/api/auth/google/callback";
 const client = new OAuth2Client(
   env.GOOGLE_CLIENT_ID,
   env.GOOGLE_CLIENT_SECRET,
