@@ -7,7 +7,6 @@ const links = [
   { href: "/dashboard", label: "Overview", icon: "space_dashboard" },
   { href: "/dashboard/orders", label: "Orders", icon: "shopping_bag" },
   { href: "/dashboard/quotes", label: "Quotes", icon: "request_quote" },
-  { href: "/dashboard/projects", label: "Projects", icon: "apartment" },
   { href: "/dashboard/enquiries", label: "Enquiries", icon: "mail" },
 ];
 

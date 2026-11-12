@@ -1,48 +1,48 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import "@/styles/dashboard.css";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
-async function fetchWithAuth<T>(path: string): Promise<T> {
-  const { cookies } = await import("next/headers");
-  const store = await cookies();
-  const cookieHeader = store.getAll().map((c) => `${c.name}=${c.value}`).join("; ");
-  const res = await fetch(`${API}${path}`, {
-    headers: cookieHeader ? { cookie: cookieHeader } : undefined,
-    cache: "no-store",
-  });
-  if (!res.ok) throw new Error(`Failed (${res.status})`);
-  return res.json();
-}
+type Counts = { orders: number; quotes: number; projects: number; enquiries: number };
 
-async function safe<T>(fn: () => Promise<T[]>): Promise<T[]> {
-  try {
-    const r = await fn();
-    return Array.isArray(r) ? r : [];
-  } catch {
-    return [];
-  }
-}
+export default function DashboardOverviewPage() {
+  const [counts, setCounts] = useState<Counts>({ orders: 0, quotes: 0, projects: 0, enquiries: 0 });
+  const [loading, setLoading] = useState(true);
 
-export default async function DashboardOverviewPage() {
-  const [orders, quotes, projects, enquiries] = await Promise.all([
-    safe(() => fetchWithAuth<any[]>("/api/orders/mine")),
-    safe(() => fetchWithAuth<any[]>("/api/quotes/mine")),
-    safe(() => fetchWithAuth<any[]>("/api/projects/mine")),
-    safe(() => fetchWithAuth<any[]>("/api/enquiries/mine")),
-  ]);
+  useEffect(() => {
+    (async () => {
+      const safeFetch = async (path: string) => {
+        try {
+          const res = await fetch(`${API}${path}`, { credentials: "include" });
+          if (!res.ok) return [];
+          const data = await res.json();
+          return Array.isArray(data) ? data : [];
+        } catch { return []; }
+      };
 
-  const openQuotes = quotes.filter((q) => q.status === "NEW" || q.status === "CONTACTED");
-  const activeProjects = projects.filter(
-    (p) => p.status === "IN_PROGRESS" || p.status === "PLANNING"
-  );
-  const openEnquiries = enquiries.filter((e) => !e.handled);
+      const [orders, quotes, enquiries] = await Promise.all([
+        safeFetch("/api/orders/mine"),
+        safeFetch("/api/quotes/mine"),
+        safeFetch("/api/enquiries/mine"),
+      ]);
+
+      setCounts({
+        orders: orders.length,
+        quotes: quotes.filter((q: any) => q.status === "NEW" || q.status === "CONTACTED").length,
+        projects: 0, // Project model was removed
+        enquiries: enquiries.length,
+      });
+      setLoading(false);
+    })();
+  }, []);
 
   const cards = [
-    { title: "Total orders", value: orders.length, icon: "shopping_bag", href: "/dashboard/orders" },
-    { title: "Open quotes", value: openQuotes.length, icon: "request_quote", href: "/dashboard/quotes", hint: `${quotes.length} total` },
-    { title: "Active projects", value: activeProjects.length, icon: "apartment", href: "/dashboard/projects", hint: `${projects.length} total` },
-    { title: "Enquiries", value: enquiries.length, icon: "mail", href: "/dashboard/enquiries", hint: `${openEnquiries.length} unanswered` },
+    { title: "Total orders", value: counts.orders, icon: "shopping_bag", href: "/dashboard/orders" },
+    { title: "Open quotes", value: counts.quotes, icon: "request_quote", href: "/dashboard/quotes" },
+    { title: "Enquiries", value: counts.enquiries, icon: "mail", href: "/dashboard/enquiries" },
   ];
 
   return (
@@ -50,20 +50,22 @@ export default async function DashboardOverviewPage() {
       <header className="admin-page-head">
         <div>
           <h1>Overview</h1>
-          <p>Your orders, quotes, projects and messages in one place.</p>
+          <p>Your orders, quotes and messages in one place.</p>
         </div>
       </header>
-
-      <div className="dash-grid">
-        {cards.map((c) => (
-          <Link key={c.title} href={c.href} className="stat-card">
-            <span className="material-symbols-outlined">{c.icon}</span>
-            <p className="stat-title">{c.title}</p>
-            <p className="stat-value">{c.value}</p>
-            {c.hint && <p className="stat-hint">{c.hint}</p>}
-          </Link>
-        ))}
-      </div>
+      {loading ? (
+        <p style={{ padding: 20, color: "var(--color-gray)" }}>Loading…</p>
+      ) : (
+        <div className="dash-grid">
+          {cards.map((c) => (
+            <Link key={c.title} href={c.href} className="stat-card">
+              <span className="material-symbols-outlined">{c.icon}</span>
+              <p className="stat-title">{c.title}</p>
+              <p className="stat-value">{c.value}</p>
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
