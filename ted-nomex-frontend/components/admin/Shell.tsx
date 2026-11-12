@@ -2,15 +2,31 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { logout } from "@/modules/auth/session";
 import { useSession } from "@/modules/auth/useSession";
 import { AdminSidebar } from "./Sidebar";
 import "@/styles/admin.css";
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
-  const { user } = useSession();
+  const { user, loading } = useSession();
   const router = useRouter();
   const pathname = usePathname();
+
+  // Client-side gate — replaces the server-side check that broke on Render
+  useEffect(() => {
+    if (loading) return;
+    if (!user) router.replace("/login");
+    else if (user.role !== "ADMIN") router.replace("/dashboard");
+  }, [loading, user, router]);
+
+  if (loading || !user || user.role !== "ADMIN") {
+    return (
+      <div style={{ padding: 40, textAlign: "center", color: "var(--color-gray)" }}>
+        Loading…
+      </div>
+    );
+  }
 
   const handleLogout = async () => {
     await logout();
@@ -29,8 +45,8 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           </div>
           <div className="topbar-user">
             <div>
-              <strong>{user?.name ?? user?.email ?? "Admin"}</strong>
-              <p>{user?.email ?? ""}</p>
+              <strong>{user.name ?? user.email ?? "Admin"}</strong>
+              <p>{user.email ?? ""}</p>
             </div>
             <button onClick={handleLogout} className="logout-btn" type="button">
               Log out
