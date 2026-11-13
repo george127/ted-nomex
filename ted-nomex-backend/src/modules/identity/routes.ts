@@ -16,13 +16,13 @@ import { env } from "../../shared/env.js";
 
 export const identityRoutes = Router();
 
-// â”€â”€ Email / password â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Email / password ──────────────────────────────────────────────
 
 identityRoutes.post("/register", async (req, res, next) => {
   try {
     const input = registerSchema.parse(req.body);
-    const { user, token } = await register(input);
-    setSessionCookie(res, token);
+    const { user } = await register(input);
+    // Do NOT set a session cookie — user must sign in after registering.
     res.status(201).json({ user });
   } catch (err) {
     next(err);
@@ -60,7 +60,7 @@ identityRoutes.get("/session", requireAuth, async (req, res, next) => {
   }
 });
 
-// â”€â”€ Update profile â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Update profile ────────────────────────────────────────────────
 
 identityRoutes.put("/me/profile", requireAuth, async (req, res, next) => {
   try {
@@ -84,7 +84,7 @@ identityRoutes.put("/me/password", requireAuth, async (req, res, next) => {
   }
 });
 
-// â”€â”€ Account deletion â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Account deletion ──────────────────────────────────────────────
 
 identityRoutes.post("/me/delete-request", requireAuth, async (req, res, next) => {
   try {
@@ -108,7 +108,7 @@ identityRoutes.post("/me/delete-confirm", async (req, res, next) => {
   }
 });
 
-// â”€â”€ Admin: user management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Admin: user management ────────────────────────────────────────
 
 identityRoutes.get("/admin/users", requireAuth, requireAdmin, async (_req, res, next) => {
   try {
@@ -129,14 +129,12 @@ identityRoutes.delete("/admin/users/:id", requireAuth, requireAdmin, async (req,
   }
 });
 
-// â”€â”€ Google OAuth â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Google OAuth ──────────────────────────────────────────────────
 
-// Redirect user to Google
 identityRoutes.get("/google", (_req, res) => {
   res.redirect(getGoogleAuthUrl());
 });
 
-// Google redirects back here with ?code=...
 identityRoutes.get("/google/callback", async (req, res, next) => {
   try {
     const code = req.query.code;
@@ -146,30 +144,33 @@ identityRoutes.get("/google/callback", async (req, res, next) => {
 
     const googleUser = await getGoogleUser(code);
 
-    // Find or create user
     let user = await db.user.findUnique({
       where: { email: googleUser.email },
     });
 
     if (!user) {
+      // Google has already verified the email address.
       user = await db.user.create({
         data: {
           email: googleUser.email,
           name: googleUser.name,
           image: googleUser.picture,
           role: "CUSTOMER",
+          emailVerified: new Date(),
           // passwordHash stays null for OAuth users
         },
       });
-    } else if (!user.image && googleUser.picture) {
-      // If existing user has no avatar, adopt Google's profile picture
-      user = await db.user.update({
-        where: { id: user.id },
-        data: { image: googleUser.picture },
-      });
+    } else {
+      // Existing user — adopt Google's picture if none is set, and backfill
+      // emailVerified if Google has verified it and we never did.
+      const updates: Record<string, unknown> = {};
+      if (!user.image && googleUser.picture) updates.image = googleUser.picture;
+      if (!user.emailVerified) updates.emailVerified = new Date();
+      if (Object.keys(updates).length > 0) {
+        user = await db.user.update({ where: { id: user.id }, data: updates });
+      }
     }
 
-    // Sign JWT + set cookie â€” same flow as email login
     const token = signToken({
       userId: user.id,
       email: user.email,
@@ -177,17 +178,15 @@ identityRoutes.get("/google/callback", async (req, res, next) => {
     });
     setSessionCookie(res, token);
 
-    // Redirect to frontend dashboard
     res.redirect(`${env.FRONTEND_URL}/dashboard`);
   } catch (err) {
     next(err);
   }
 });
 
-
-// ══════════════════════════════════════════════════════════════
-// PASSWORD RESET — token helpers + routes
-// ══════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════
+// PASSWORD RESET
+// ══════════════════════════════════════════════════════════════════
 import jwtPkg from "jsonwebtoken";
 import { sendEmail as sendResetEmail } from "../../shared/mail.js";
 import { logger as resetLogger } from "../../shared/logger.js";
@@ -237,7 +236,6 @@ identityRoutes.post("/forgot-password", async (req, res, next) => {
       select: { id: true, email: true, name: true, deletedAt: true, passwordHash: true },
     });
 
-    // Silent success for enumeration safety
     if (!user || user.deletedAt || !user.passwordHash) {
       resetLogger.info(`Password reset requested for non-resettable email: ${input.email}`);
       return res.status(200).json({
@@ -277,7 +275,6 @@ identityRoutes.post("/forgot-password", async (req, res, next) => {
     return res.status(200).json({
       ok: true,
       message: "If an account exists for that email, a reset link has been sent.",
-      // In development we return the token/url so you can test without a verified Resend domain
       ...(env.NODE_ENV === "development"
         ? { devToken: token, resetUrl }
         : {}),
@@ -302,7 +299,6 @@ identityRoutes.post("/reset-password", async (req, res, next) => {
     const newHash = await hashResetPassword(input.password);
     await db.user.update({ where: { id: user.id }, data: { passwordHash: newHash } });
 
-    // Invalidate all existing sessions
     await db.session.deleteMany({ where: { userId: user.id } });
 
     resetLogger.info(`Password reset completed for user ${user.id}`);
