@@ -1,29 +1,45 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { StatusBadge, quoteVariant } from "@/components/admin/StatusBadge";
 import "@/styles/dashboard.css";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
-async function fetchWithAuth<T>(path: string): Promise<T> {
-  const { cookies } = await import("next/headers");
-  const store = await cookies();
-  const cookieHeader = store.getAll().map((c) => `${c.name}=${c.value}`).join("; ");
-  const res = await fetch(`${API}${path}`, {
-    headers: cookieHeader ? { cookie: cookieHeader } : undefined,
-    cache: "no-store",
-  });
-  if (!res.ok) throw new Error(`Failed (${res.status})`);
-  return res.json();
-}
+type Quote = {
+  id: string;
+  estimate: string;
+  currency: string;
+  status: string;
+  notes: string | null;
+  createdAt: string;
+};
 
-export default async function DashboardQuotesPage() {
-  let quotes: any[] = [];
-  let error: string | null = null;
-  try {
-    quotes = await fetchWithAuth<any[]>("/api/quotes/mine");
-  } catch (err) {
-    error = err instanceof Error ? err.message : "Could not load quotes";
-  }
+export default function DashboardQuotesPage() {
+  const [quotes, setQuotes] = useState<Quote[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch(`${API}/api/quotes/mine`, {
+          credentials: "include",
+        });
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body?.message ?? body?.error ?? `Failed (${res.status})`);
+        }
+        const data = await res.json();
+        setQuotes(Array.isArray(data) ? data : []);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Could not load quotes");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
 
   return (
     <div className="admin-page">
@@ -36,7 +52,9 @@ export default async function DashboardQuotesPage() {
 
       {error && <div className="admin-alert admin-alert-error">{error}</div>}
 
-      {quotes.length === 0 ? (
+      {loading ? (
+        <p style={{ padding: 20, color: "var(--color-gray)" }}>Loading…</p>
+      ) : quotes.length === 0 ? (
         <div className="admin-empty">
           <span className="material-symbols-outlined">request_quote</span>
           <h3>No saved quotes</h3>
@@ -66,9 +84,7 @@ export default async function DashboardQuotesPage() {
                       {Number(q.estimate).toLocaleString()}
                     </strong>
                   </td>
-                  <td>
-                    <StatusBadge variant={quoteVariant(q.status)} />
-                  </td>
+                  <td><StatusBadge variant={quoteVariant(q.status)} /></td>
                   <td>{q.notes ?? "—"}</td>
                   <td>{new Date(q.createdAt).toLocaleDateString("en-GB")}</td>
                 </tr>
