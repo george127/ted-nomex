@@ -6,15 +6,21 @@ import {
   listMyOrders, listAllOrders, updateOrder, deleteOrder,
 } from "./service.js";
 import { createCheckoutSession } from "./stripe.js";
-import { requireAdmin, requireAuth, optionalAuth } from "../../identity/index.js";
+import {
+  requireAdmin,
+  requireAuth,
+  requireVerifiedEmail,
+} from "../../identity/index.js";
 import { env } from "../../../shared/env.js";
 
 export const checkoutRoutes = Router();
 
-checkoutRoutes.post("/", optionalAuth, async (req, res, next) => {
+// Authenticated + verified users only
+checkoutRoutes.post("/", requireAuth, requireVerifiedEmail, async (req, res, next) => {
   try {
     const input = checkoutSchema.parse(req.body);
-    const { order, lineItems } = await createOrder(input, req.user?.userId ?? null);
+
+    const { order, lineItems } = await createOrder(input, req.user!.userId);
 
     const session = await createCheckoutSession({
       orderId: order.id,

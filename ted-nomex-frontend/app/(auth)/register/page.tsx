@@ -34,8 +34,8 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       await register(name, email, password);
-      router.push("/dashboard");
-      router.refresh();
+      // Do NOT auto-login. Send them to sign in.
+      router.push(`/login?registered=1&email=${encodeURIComponent(email)}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Registration failed");
     } finally {

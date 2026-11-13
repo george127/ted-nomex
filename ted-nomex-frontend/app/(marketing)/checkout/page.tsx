@@ -1,26 +1,50 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { clearCart } from "@/modules/cart/service";
+import { useSession } from "@/modules/auth/useSession";
 import "@/styles/checkout.css";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 function currencySymbol(code?: string | null) {
   const c = (code ?? "GHS").toUpperCase();
-  if (c === "GHS") return "GHâ‚µ";
+  if (c === "GHS") return "GH₵";
   if (c === "USD") return "$";
-  if (c === "EUR") return "â‚¬";
-  if (c === "GBP") return "Â£";
+  if (c === "EUR") return "€";
+  if (c === "GBP") return "£";
   return c;
 }
 
 export default function CheckoutPage() {
   const { items, subtotal, clear } = useCart();
+  const { user, loading: sessionLoading } = useSession();
+  const router = useRouter();
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Hard gate: bounce guests to /login
+  useEffect(() => {
+    if (!sessionLoading && !user) {
+      router.replace("/login?next=/checkout");
+    }
+  }, [sessionLoading, user, router]);
+
+  if (sessionLoading || !user) {
+    return (
+      <section className="checkout-body">
+        <div className="container">
+          <p style={{ padding: 40, textAlign: "center", color: "var(--color-gray)" }}>
+            Loading…
+          </p>
+        </div>
+      </section>
+    );
+  }
 
   if (items.length === 0) {
     return (
@@ -29,7 +53,7 @@ export default function CheckoutPage() {
           <div className="cart-empty">
             <span className="material-symbols-outlined">shopping_cart</span>
             <h1>Nothing to check out</h1>
-            <p>Your cart is empty â€” add some products first.</p>
+            <p>Your cart is empty — add some products first.</p>
             <Link href="/product" className="cart-empty-cta">
               Browse products
               <span className="material-symbols-outlined">arrow_forward</span>
@@ -53,13 +77,10 @@ export default function CheckoutPage() {
             productId: i.productId,
             quantity: i.quantity,
           })),
-          // Stripe will collect real name/email/address during checkout.
-          // These placeholders satisfy the backend schema so the request
-          // goes through; the webhook updates them after payment.
           shipping: {
-            name: "Pending (collected at Stripe)",
-            email: "pending@ted-nomex.local",
-            phone: null,
+            name: user.name ?? "Customer",
+            email: user.email,
+            phone: user.phone ?? null,
             address: "Pending",
             city: "Pending",
             region: null,
@@ -72,6 +93,10 @@ export default function CheckoutPage() {
 
       const data = await res.json();
       if (!res.ok) {
+        if (res.status === 401) {
+          router.push("/login?next=/checkout");
+          return;
+        }
         throw new Error(data.message ?? "Checkout failed");
       }
       if (data.checkoutUrl) {
@@ -92,9 +117,9 @@ export default function CheckoutPage() {
       <div className="container">
         <nav className="hero-chip-dark" aria-label="Breadcrumb">
           <Link href="/">Home</Link>
-          <span className="dot">Â·</span>
+          <span className="dot">·</span>
           <Link href="/cart">Cart</Link>
-          <span className="dot">Â·</span>
+          <span className="dot">·</span>
           <span>Checkout</span>
         </nav>
 
@@ -107,12 +132,12 @@ export default function CheckoutPage() {
 
         <div className="checkout-layout">
           <div className="checkout-form">
-                        <div className="checkout-section">
+            <div className="checkout-section">
               <p className="checkout-kicker">Payment</p>
               <h2>How would you like to pay?</h2>
               <p className="checkout-hint">
                 You&apos;ll be redirected to Stripe&apos;s secure checkout to enter your
-                email, shipping address, and payment details. Nothing to fill out here.
+                shipping address and payment details.
               </p>
 
               <div className="checkout-stripe-note">
@@ -161,7 +186,7 @@ export default function CheckoutPage() {
               onClick={handlePay}
               disabled={loading}
             >
-              {loading ? "Redirecting to Stripeâ€¦" : "Pay with Stripe"}
+              {loading ? "Redirecting to Stripe…" : "Pay with Stripe"}
               {!loading && <span className="material-symbols-outlined">lock</span>}
             </button>
 

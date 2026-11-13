@@ -73,3 +73,31 @@ export async function rejectDeletedUsers(
   }
   next();
 }
+
+export async function requireVerifiedEmail(
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+) {
+  if (!req.user) {
+    return next(new AppError("Authentication required", 401, "UNAUTHENTICATED"));
+  }
+  const { db } = await import("../db.js");
+  const user = await db.user.findUnique({
+    where: { id: req.user.userId },
+    select: { emailVerified: true, deletedAt: true },
+  });
+  if (!user || user.deletedAt) {
+    return next(new AppError("Account not available", 401, "ACCOUNT_UNAVAILABLE"));
+  }
+  if (!user.emailVerified) {
+    return next(
+      new AppError(
+        "Please verify your email before ordering",
+        403,
+        "EMAIL_NOT_VERIFIED",
+      ),
+    );
+  }
+  next();
+}

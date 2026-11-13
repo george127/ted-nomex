@@ -1,9 +1,21 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect } from "react";
+import { clearCart } from "@/modules/cart/service";
+import { useCart } from "@/lib/cart";
 import "@/styles/checkout.css";
 
-export const metadata = { title: "Order confirmed" };
-
 export default function CheckoutSuccessPage() {
+  const { clear } = useCart();
+
+  // Belt-and-braces — checkout already cleared before redirect, this catches any
+  // race where the browser preserved state across the Stripe round-trip.
+  useEffect(() => {
+    clear();
+    clearCart();
+  }, [clear]);
+
   return (
     <section className="checkout-body">
       <div className="container">
@@ -17,12 +29,12 @@ export default function CheckoutSuccessPage() {
             is preparing your order for delivery.
           </p>
           <div className="checkout-success-actions">
-            <Link href="/product" className="cart-summary-cta">
-              Continue shopping
+            <Link href="/dashboard/orders" className="cart-summary-cta">
+              View my orders
               <span className="material-symbols-outlined">arrow_forward</span>
             </Link>
-            <Link href="/" className="cart-summary-ghost">
-              Back home
+            <Link href="/product" className="cart-summary-ghost">
+              Continue shopping
             </Link>
           </div>
         </div>

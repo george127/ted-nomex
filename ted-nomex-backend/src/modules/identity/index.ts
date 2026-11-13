@@ -4,4 +4,5 @@ export {
   requireAuth,
   requireAdmin,
   optionalAuth,
+  requireVerifiedEmail,
 } from "../../shared/auth/middleware.js";

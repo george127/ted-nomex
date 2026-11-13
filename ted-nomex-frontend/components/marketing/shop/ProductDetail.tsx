@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { Product } from "@/modules/shop/products/service";
 import { useCart } from "@/lib/cart";
+import { useSession } from "@/modules/auth/useSession";
 
 type DetailProps = {
   product: Product;
@@ -21,6 +23,9 @@ function currencySymbol(code?: string | null) {
 
 export function ProductDetail({ product, related = [] }: DetailProps) {
   const { addToCart } = useCart();
+  const { user } = useSession();
+  const router = useRouter();
+
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
 
@@ -33,6 +38,10 @@ export function ProductDetail({ product, related = [] }: DetailProps) {
 
   const handleAdd = () => {
     if (outOfStock) return;
+    if (!user) {
+      router.push(`/login?next=/product/${product.slug}`);
+      return;
+    }
     addToCart(product, qty);
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
@@ -188,7 +197,13 @@ export function ProductDetail({ product, related = [] }: DetailProps) {
                   onClick={handleAdd}
                   disabled={outOfStock}
                 >
-                  {added ? "Added to cart ✓" : outOfStock ? "Out of stock" : "Add to cart"}
+                  {added
+                    ? "Added to cart ✓"
+                    : outOfStock
+                    ? "Out of stock"
+                    : user
+                    ? "Add to cart"
+                    : "Sign in to buy"}
                   {!outOfStock && !added && (
                     <span className="material-symbols-outlined">shopping_cart</span>
                   )}

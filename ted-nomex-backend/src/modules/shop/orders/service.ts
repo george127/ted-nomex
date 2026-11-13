@@ -42,7 +42,7 @@ export async function validateCartAndGetProducts(input: CheckoutInput) {
   return { lineItems, subtotal };
 }
 
-export async function createOrder(input: CheckoutInput, userId: string | null) {
+export async function createOrder(input: CheckoutInput, userId: string) {
   const { lineItems, subtotal } = await validateCartAndGetProducts(input);
   const shipping = 0;
   const total = subtotal + shipping;

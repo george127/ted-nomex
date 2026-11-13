@@ -84,7 +84,7 @@ export async function login(email: string, password: string): Promise<SessionUse
   return data.user as SessionUser;
 }
 
-// â”€â”€ Register â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â”€â”€ Register 
 export async function register(
   name: string,
   email: string,
@@ -93,15 +93,15 @@ export async function register(
 ): Promise<SessionUser> {
   const res = await fetch(`${API}/api/auth/register`, {
     method: "POST",
-    credentials: "include",
+    // NOTE: no credentials — do not let the browser store the session cookie.
+    // The user must sign in after registration.
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name, email, password, phone: phone ?? undefined }),
   });
   const data = await parse(res);
-  notifyAuthChanged();
+  // Do not notifyAuthChanged() — no session was set.
   return data.user as SessionUser;
 }
-
 // â”€â”€ Logout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export async function logout(): Promise<void> {
   try {

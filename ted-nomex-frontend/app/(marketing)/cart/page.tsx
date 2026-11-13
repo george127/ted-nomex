@@ -2,19 +2,21 @@
 
 import Link from "next/link";
 import { useCart } from "@/lib/cart";
+import { useSession } from "@/modules/auth/useSession";
 import "@/styles/cart.css";
 
 function currencySymbol(code?: string | null) {
   const c = (code ?? "GHS").toUpperCase();
-  if (c === "GHS") return "GH\u20b5";
+  if (c === "GHS") return "GH₵";
   if (c === "USD") return "$";
-  if (c === "EUR") return "\u20ac";
-  if (c === "GBP") return "\u00a3";
+  if (c === "EUR") return "€";
+  if (c === "GBP") return "£";
   return c;
 }
 
 export default function CartPage() {
   const { items, setQuantity, removeFromCart, clear, subtotal } = useCart();
+  const { user } = useSession();
 
   if (items.length === 0) {
     return (
@@ -137,10 +139,18 @@ export default function CartPage() {
                 <span>{currencySymbol(items[0]?.currency)} {subtotal.toLocaleString()}</span>
               </div>
 
-              <Link href="/checkout" className="cart-summary-cta">
-                Proceed to checkout
-                <span className="material-symbols-outlined">arrow_forward</span>
-              </Link>
+              {user ? (
+                <Link href="/checkout" className="cart-summary-cta">
+                  Proceed to checkout
+                  <span className="material-symbols-outlined">arrow_forward</span>
+                </Link>
+              ) : (
+                <Link href="/login?next=/checkout" className="cart-summary-cta">
+                  Sign in to checkout
+                  <span className="material-symbols-outlined">login</span>
+                </Link>
+              )}
+
               <Link href="/product" className="cart-summary-ghost">
                 Continue shopping
               </Link>

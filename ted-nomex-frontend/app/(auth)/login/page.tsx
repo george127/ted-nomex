@@ -1,14 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 import { login, getGoogleAuthUrl } from "@/modules/auth/session";
 import { PasswordInput } from "@/components/auth/PasswordInput";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next");
+  const registered = searchParams.get("registered") === "1";
+  const prefillEmail = searchParams.get("email") ?? "";
+
+  const [email, setEmail] = useState(prefillEmail);
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -19,7 +24,8 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const user = await login(email, password);
-      router.push(user.role === "ADMIN" ? "/admin" : "/dashboard");
+      const fallback = user.role === "ADMIN" ? "/admin" : "/dashboard";
+      router.push(next ?? fallback);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
@@ -30,8 +36,18 @@ export default function LoginPage() {
 
   return (
     <form onSubmit={onSubmit} className="auth-form">
-      <h1>Welcome back</h1>
-      <p className="muted">Sign in to your Ted-Nomex account.</p>
+      <h1>{registered ? "Account created" : "Welcome back"}</h1>
+      <p className="muted">
+        {registered
+          ? "Sign in with your new credentials to continue."
+          : "Sign in to your Ted-Nomex account."}
+      </p>
+
+      {registered && (
+        <p className="form-success" role="status">
+          Your account is ready. Please sign in below.
+        </p>
+      )}
 
       <label htmlFor="email">Email</label>
       <input
@@ -78,5 +94,19 @@ export default function LoginPage() {
         Don&apos;t have an account? <Link href="/register">Create one</Link>
       </p>
     </form>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="auth-form">
+          <p className="muted">Loading…</p>
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

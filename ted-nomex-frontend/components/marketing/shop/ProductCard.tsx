@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { Product } from "@/modules/shop/products/service";
 import { useCart } from "@/lib/cart";
+import { useSession } from "@/modules/auth/useSession";
 
 function currencySymbol(code?: string | null) {
   const c = (code ?? "GHS").toUpperCase();
@@ -15,10 +17,23 @@ function currencySymbol(code?: string | null) {
 
 export function ProductCard({ product }: { product: Product }) {
   const { addToCart } = useCart();
+  const { user } = useSession();
+  const router = useRouter();
+
   const cover = product.images?.[0] ?? "";
   const href = `/product/${product.slug}`;
   const currency = currencySymbol(product.currency);
   const outOfStock = product.stock <= 0;
+
+  const handleQuickAdd = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!user) {
+      router.push(`/login?next=/product`);
+      return;
+    }
+    addToCart(product, 1);
+  };
 
   return (
     <Link href={href} className="product-card">
@@ -41,11 +56,7 @@ export function ProductCard({ product }: { product: Product }) {
             type="button"
             className="prc-quick-add"
             aria-label={`Add ${product.name} to cart`}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              addToCart(product, 1);
-            }}
+            onClick={handleQuickAdd}
           >
             <span className="material-symbols-outlined">add_shopping_cart</span>
           </button>
