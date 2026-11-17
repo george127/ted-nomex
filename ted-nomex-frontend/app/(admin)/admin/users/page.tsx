@@ -1,36 +1,44 @@
-import { getAdminUsers } from "@/lib/admin";
+"use client";
+
+import { useEffect, useState } from "react";
+import { getAdminUsers, type AdminUser } from "@/lib/admin";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import "@/styles/admin.css";
 
-export const metadata = { title: "Admin — Users" };
+export default function AdminUsersPage() {
+  const [users, setUsers] = useState<AdminUser[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-export default async function AdminUsersPage() {
-  let users: Awaited<ReturnType<typeof getAdminUsers>> = [];
-  let error: string | null = null;
-  try {
-    users = await getAdminUsers();
-  } catch (err) {
-    error = err instanceof Error ? err.message : "Could not load users";
-  }
+  useEffect(() => {
+    let alive = true;
+    getAdminUsers()
+      .then((u) => { if (alive) setUsers(u); })
+      .catch((err) => { if (alive) setError(err.message); });
+    return () => { alive = false; };
+  }, []);
 
   return (
     <div className="admin-page">
       <header className="admin-page-head">
         <div>
           <h1>Users</h1>
-          <p>{users.length} registered</p>
+          <p>{users ? `${users.length} registered` : "Loading…"}</p>
         </div>
       </header>
 
       {error && <div className="admin-alert admin-alert-error">{error}</div>}
 
-      {users.length === 0 ? (
+      {!users && !error && <p style={{ padding: 20 }}>Loading…</p>}
+
+      {users && users.length === 0 && (
         <div className="admin-empty">
           <span className="material-symbols-outlined">group</span>
           <h3>No users yet</h3>
           <p>Registered accounts will appear here.</p>
         </div>
-      ) : (
+      )}
+
+      {users && users.length > 0 && (
         <div className="admin-table-wrap">
           <table className="admin-table">
             <thead>
@@ -45,10 +53,7 @@ export default async function AdminUsersPage() {
             </thead>
             <tbody>
               {users.map((u) => {
-                const initial = (u.name ?? u.email ?? "U")
-                  .trim()
-                  .charAt(0)
-                  .toUpperCase();
+                const initial = (u.name ?? u.email ?? "U").trim().charAt(0).toUpperCase();
                 return (
                   <tr key={u.id}>
                     <td>
@@ -61,9 +66,7 @@ export default async function AdminUsersPage() {
                         )}
                       </div>
                     </td>
-                    <td>
-                      <strong>{u.name ?? "—"}</strong>
-                    </td>
+                    <td><strong>{u.name ?? "—"}</strong></td>
                     <td>{u.email}</td>
                     <td>
                       <span className={`role-pill role-${u.role.toLowerCase()}`}>
@@ -71,9 +74,7 @@ export default async function AdminUsersPage() {
                       </span>
                     </td>
                     <td>
-                      <StatusBadge
-                        variant={u.emailVerified ? "published" : "draft"}
-                      />
+                      <StatusBadge variant={u.emailVerified ? "published" : "draft"} />
                     </td>
                     <td>{new Date(u.createdAt).toLocaleDateString("en-GB")}</td>
                   </tr>

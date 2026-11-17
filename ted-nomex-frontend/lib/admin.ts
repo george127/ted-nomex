@@ -1,48 +1,39 @@
-// lib/admin.ts â€” server-side admin fetchers with cookie forwarding.
+// lib/admin.ts — client-side admin fetchers.
+// These run in the browser, so the backend's ted_session cookie
+// is sent automatically with credentials: "include".
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const API = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 async function adminFetch<T>(path: string): Promise<T> {
-  const url = `${API}${path}`;
-
-  // On the server (Server Component / layout), credentials:"include" does
-  // nothing â€” Node's fetch has no cookie jar. We must forward the incoming
-  // request's cookies as a Cookie header.
-  const isServer = typeof window === "undefined";
-  let cookieHeader: string | null = null;
-
-  if (isServer) {
-    const { cookies } = await import("next/headers");
-    const store = await cookies(); // async in Next.js 15+
-    cookieHeader = store
-      .getAll()
-      .map((c) => `${c.name}=${c.value}`)
-      .join("; ");
+  let res: Response;
+  try {
+    res = await fetch(`${API}${path}`, {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store",
+    });
+  } catch (err) {
+    throw new Error(
+      `Network error — could not reach the API. ` +
+        (err instanceof Error ? err.message : ""),
+    );
   }
-
-  const res = await fetch(url, {
-    method: "GET",
-    credentials: isServer ? "omit" : "include",
-    headers: cookieHeader ? { cookie: cookieHeader } : undefined,
-    cache: "no-store",
-  });
-
   if (res.status === 401) {
     throw new Error(
-      `Unauthorized â€” ted_session cookie not present in request to ${path}`
+      "Unauthorized — your session cookie was not accepted. Please log out and log in again.",
     );
   }
   if (res.status === 403) {
-    throw new Error(`Forbidden â€” user is not an ADMIN (${path})`);
+    throw new Error("Forbidden — your account is not an ADMIN.");
   }
   if (!res.ok) {
     const body = await res.text().catch(() => "");
-    throw new Error(`${res.status} â€” ${path} â€” ${body.slice(0, 200)}`);
+    throw new Error(`${res.status} — ${path} — ${body.slice(0, 200)}`);
   }
   return (await res.json()) as T;
 }
 
-// â”€â”€ Shape mirrors â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Shape mirrors ─────────────────────────────────────────────
 export type AdminUser = {
   id: string;
   name: string | null;
@@ -65,7 +56,13 @@ export type AdminOrder = {
   total: string;
   paymentStatus: string;
   createdAt: string;
-  items: { id: string; title: string; quantity: number; price: string; image: string | null }[];
+  items: {
+    id: string;
+    title: string;
+    quantity: number;
+    price: string;
+    image: string | null;
+  }[];
   user: { id: string; name: string | null; email: string } | null;
 };
 
@@ -158,7 +155,7 @@ export type AdminProduct = {
   createdAt: string;
 };
 
-// â”€â”€ Fetchers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Fetchers ──────────────────────────────────────────────────
 export const getAdminOrders = () =>
   adminFetch<AdminOrder[]>("/api/orders/admin/all?status=all&limit=100&offset=0");
 
@@ -167,7 +164,6 @@ export const getAdminQuotes = () =>
 
 export const getAdminEnquiries = () =>
   adminFetch<AdminEnquiry[]>("/api/enquiries/admin/all?handled=all&limit=100&offset=0");
-
 
 export const getAdminNews = () =>
   adminFetch<AdminNews[]>("/api/cms/news/admin/all?published=all");
