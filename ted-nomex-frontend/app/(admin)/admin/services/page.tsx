@@ -149,22 +149,27 @@ export default function AdminServicesPage() {
   const save = async (e: React.FormEvent) => {
     e.preventDefault(); setSaving(true); setSaveError(null);
     try {
-      // Slug guard: if typed < 3 chars, regenerate from name/title
-      let slug = (draft.slug || "").trim();
-      if (slug.length < 3) {
-        slug = slugify(draft.title);
+      // Slug guard: if typed value is under 3 chars, regenerate from title.
+      // Fall back to a timestamp if the title is also too short.
+      let safeSlug = (draft.slug || "").trim();
+      if (safeSlug.length < 3) {
+        safeSlug = slugify(draft.title);
       }
-      if (slug.length < 3) {
-        slug = item- + Date.now();
+      if (safeSlug.length < 3) {
+        safeSlug = "item-" + Date.now().toString();
       }
+
       const payload = {
-        title: draft.title, slug,
-        excerpt: draft.excerpt, content: draft.content,
+        title: draft.title,
+        slug: safeSlug,
+        excerpt: draft.excerpt,
+        content: draft.content,
         coverImage: draft.coverImage,
         features: splitLines(draft.featuresText),
         tags: splitLines(draft.tagsText),
         bullets: splitLines(draft.bulletsText),
-        order: Number(draft.order), published: draft.published,
+        order: Number(draft.order),
+        published: draft.published,
       };
       if (editing) await apiCall("PATCH", `/api/cms/services/${editing.id}`, payload);
       else await apiCall("POST", "/api/cms/services", payload);

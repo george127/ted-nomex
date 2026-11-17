@@ -145,20 +145,26 @@ export default function AdminProductsPage() {
   const save = async (e: React.FormEvent) => {
     e.preventDefault(); setSaving(true); setSaveError(null);
     try {
-      // Slug guard: if typed < 3 chars, regenerate from name/title
-      let slug = (draft.slug || "").trim();
-      if (slug.length < 3) {
-        slug = slugify(draft.name);
+      // Slug guard: if typed value is under 3 chars, regenerate from name.
+      // Fall back to a timestamp if the name is also too short.
+      let safeSlug = (draft.slug || "").trim();
+      if (safeSlug.length < 3) {
+        safeSlug = slugify(draft.name);
       }
-      if (slug.length < 3) {
-        slug = item- + Date.now();
+      if (safeSlug.length < 3) {
+        safeSlug = "item-" + Date.now().toString();
       }
+
       const payload = {
-        name: draft.name, slug,
+        name: draft.name,
+        slug: safeSlug,
         description: draft.description,
-        price: Number(draft.price), currency: draft.currency,
-        stock: Number(draft.stock), images: draft.images,
-        category: draft.category || null, published: draft.published,
+        price: Number(draft.price),
+        currency: draft.currency,
+        stock: Number(draft.stock),
+        images: draft.images,
+        category: draft.category || null,
+        published: draft.published,
       };
       if (editing) await apiCall("PATCH", `/api/shop/products/${editing.id}`, payload);
       else await apiCall("POST", "/api/shop/products", payload);
