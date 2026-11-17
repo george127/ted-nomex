@@ -27,7 +27,6 @@ export default function AdminUsersPage() {
       </header>
 
       {error && <div className="admin-alert admin-alert-error">{error}</div>}
-
       {!users && !error && <p style={{ padding: 20 }}>Loading…</p>}
 
       {users && users.length === 0 && (
@@ -47,7 +46,7 @@ export default function AdminUsersPage() {
                 <th>Name</th>
                 <th>Email</th>
                 <th>Role</th>
-                <th>Verified</th>
+                <th>Email verified</th>
                 <th>Joined</th>
               </tr>
             </thead>
@@ -74,7 +73,9 @@ export default function AdminUsersPage() {
                       </span>
                     </td>
                     <td>
-                      <StatusBadge variant={u.emailVerified ? "published" : "draft"} />
+                      <span className={`verified-pill ${u.emailVerified ? "verified" : "unverified"}`}>
+                        {u.emailVerified ? "Verified" : "Unverified"}
+                      </span>
                     </td>
                     <td>{new Date(u.createdAt).toLocaleDateString("en-GB")}</td>
                   </tr>

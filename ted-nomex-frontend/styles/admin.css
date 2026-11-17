@@ -832,5 +832,26 @@
   display: block;
 }
 
+.verified-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: 4px;
+}
+
+.verified-pill.verified {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.verified-pill.unverified {
+  background: #fef3c7;
+  color: #92400e;
+}
+
 @media (max-width: 767px) { .admin-upload-grid { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 480px) { .admin-upload-grid { grid-template-columns: repeat(2, 1fr); } }
