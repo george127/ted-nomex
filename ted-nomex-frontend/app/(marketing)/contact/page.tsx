@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import "@/styles/contact.css";
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const API = process.env.NEXT_PUBLIC_API_URL || "";
 
 const MAP_EMBED_URL =
   "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3970.9780867857566!2d-0.19688492497356382!3d5.560283794412008!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNcKwMzMnMzcuMCJOIDDCsDExJzQ4LjEiVw!5e0!3m2!1sen!2sgh!4v1730000000000!5m2!1sen!2sgh";

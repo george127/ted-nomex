@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import "@/styles/admin.css";
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const API = process.env.NEXT_PUBLIC_API_URL || "";
 
 type Service = {
   id: string; slug: string; title: string; excerpt: string; content: string;

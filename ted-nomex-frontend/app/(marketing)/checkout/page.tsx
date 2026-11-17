@@ -8,7 +8,7 @@ import { clearCart } from "@/modules/cart/service";
 import { useSession } from "@/modules/auth/useSession";
 import "@/styles/checkout.css";
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const API = process.env.NEXT_PUBLIC_API_URL || "";
 
 function currencySymbol(code?: string | null) {
   const c = (code ?? "GHS").toUpperCase();

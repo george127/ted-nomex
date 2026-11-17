@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import "@/styles/dashboard.css";
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const API = process.env.NEXT_PUBLIC_API_URL || "";
 
 type Counts = { orders: number; quotes: number; projects: number; enquiries: number };
 

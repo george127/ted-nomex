@@ -17,7 +17,7 @@ export async function apiFetch<T>(
   path: string,
   options: RequestOptions = {},
 ): Promise<T> {
-  const url = `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000"}${path}`;
+  const url = `${process.env.NEXT_PUBLIC_API_URL || ""}${path}`;
 
   const res = await fetch(url, {
     ...options,

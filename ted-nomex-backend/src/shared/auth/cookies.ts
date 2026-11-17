@@ -9,8 +9,9 @@ const baseOptions = {
   secure: isProd,
   sameSite: (isProd ? "none" : "lax") as "none" | "lax",
   path: "/",
-  // ADD THIS: Allow the cookie to be shared across subdomains in production
-  domain: isProd ? ".onrender.com" : undefined,
+  // IMPORTANT: do NOT set domain. A host-only cookie is correct.
+  // Setting domain=.onrender.com is rejected by browsers because
+  // onrender.com is on the public suffix list.
 } as const;
 
 export function setSessionCookie(res: Response, token: string) {

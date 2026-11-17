@@ -3,7 +3,7 @@
 import { useState } from "react";
 import "@/styles/cost.css";
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const API = process.env.NEXT_PUBLIC_API_URL || "";
 
 const WALL_OPTIONS = [
   { label: "Painting (GH₵ 154)", value: 154 },

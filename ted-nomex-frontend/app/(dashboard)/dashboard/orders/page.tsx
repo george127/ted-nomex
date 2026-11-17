@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { StatusBadge, orderVariant } from "@/components/admin/StatusBadge";
 import "@/styles/dashboard.css";
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const API = process.env.NEXT_PUBLIC_API_URL || "";
 
 type OrderItem = { id: string; title: string; quantity: number; price: string; image: string | null };
 type Order = {
