@@ -13,7 +13,7 @@ export type SessionUser = {
   createdAt: string;
 };
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const API = process.env.NEXT_PUBLIC_API_URL || "";
 
 async function parse(res: Response) {
   let body: any = null;
