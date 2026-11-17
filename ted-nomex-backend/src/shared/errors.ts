@@ -26,6 +26,12 @@ export function errorHandler(
     res.status(422).json({
       message: "Validation failed",
       code: "VALIDATION_ERROR",
+      // Flat list: [{ path: "slug", message: "..." }] — easy for the frontend to display
+      issues: err.issues.map((i) => ({
+        path: i.path.join("."),
+        message: i.message,
+      })),
+      // Keep the old shape too, for backwards compatibility
       errors: err.flatten().fieldErrors,
     });
     return;

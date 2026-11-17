@@ -37,7 +37,12 @@ async function apiCall(method: string, path: string, body?: unknown) {
   });
   let json: any = null;
   try { json = await res.json(); } catch {}
-  if (!res.ok) throw new Error(json?.message ?? `Failed (${res.status})`);
+  if (!res.ok) {
+    const err: any = new Error(json?.message ?? `Failed (${res.status})`);
+    err.body = json;
+    err.status = res.status;
+    throw err;
+  }
   return json;
 }
 
@@ -174,7 +179,21 @@ export default function AdminServicesPage() {
       if (editing) await apiCall("PATCH", `/api/cms/services/${editing.id}`, payload);
       else await apiCall("POST", "/api/cms/services", payload);
       setOpen(false); setEditing(null); await load();
-    } catch (err) { setSaveError(err instanceof Error ? err.message : "Failed to save"); }
+    } catch (err: any) {
+      const body = err?.body;
+      if (body?.issues?.[0]) {
+        setSaveError(`${body.issues[0].path}: ${body.issues[0].message}`);
+      } else if (body?.errors) {
+        const firstKey = Object.keys(body.errors)[0];
+        if (firstKey) {
+          setSaveError(`${firstKey}: ${body.errors[firstKey][0]}`);
+        } else {
+          setSaveError(err.message ?? "Failed to save");
+        }
+      } else {
+        setSaveError(err instanceof Error ? err.message : "Failed to save");
+      }
+    }
     finally { setSaving(false); }
   };
 
