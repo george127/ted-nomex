@@ -145,8 +145,16 @@ export default function AdminProductsPage() {
   const save = async (e: React.FormEvent) => {
     e.preventDefault(); setSaving(true); setSaveError(null);
     try {
+      // Slug guard: if typed < 3 chars, regenerate from name/title
+      let slug = (draft.slug || "").trim();
+      if (slug.length < 3) {
+        slug = slugify(draft.name);
+      }
+      if (slug.length < 3) {
+        slug = item- + Date.now();
+      }
       const payload = {
-        name: draft.name, slug: draft.slug || slugify(draft.name),
+        name: draft.name, slug,
         description: draft.description,
         price: Number(draft.price), currency: draft.currency,
         stock: Number(draft.stock), images: draft.images,

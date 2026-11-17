@@ -149,8 +149,16 @@ export default function AdminServicesPage() {
   const save = async (e: React.FormEvent) => {
     e.preventDefault(); setSaving(true); setSaveError(null);
     try {
+      // Slug guard: if typed < 3 chars, regenerate from name/title
+      let slug = (draft.slug || "").trim();
+      if (slug.length < 3) {
+        slug = slugify(draft.title);
+      }
+      if (slug.length < 3) {
+        slug = item- + Date.now();
+      }
       const payload = {
-        title: draft.title, slug: draft.slug || slugify(draft.title),
+        title: draft.title, slug,
         excerpt: draft.excerpt, content: draft.content,
         coverImage: draft.coverImage,
         features: splitLines(draft.featuresText),

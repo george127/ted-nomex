@@ -152,11 +152,38 @@ export default function AdminNewsPage() {
   const save = async (e: React.FormEvent) => {
     e.preventDefault(); setSaving(true); setSaveError(null);
     try {
+      // Slug: prefer typed, but if < 3 chars, regenerate from title.
+      // If title is also short, append timestamp so it's always valid.
+      let slug = (draft.slug || "").trim();
+      if (slug.length < 3) {
+        slug = slugify(draft.title);
+      }
+      if (slug.length < 3) {
+        slug = `post-${Date.now()}`;
+      }
+
+      // publishedAt: convert datetime-local (YYYY-MM-DDTHH:MM) to full ISO.
+      // Zod's z.string().datetime() requires seconds + timezone.
+      let publishedAt: string | null = null;
+      if (draft.published && draft.publishedAt) {
+        const parsed = new Date(draft.publishedAt);
+        if (!isNaN(parsed.getTime())) {
+          publishedAt = parsed.toISOString();
+        }
+      } else if (draft.published) {
+        // published but no explicit date — use now
+        publishedAt = new Date().toISOString();
+      }
+
       const payload = {
-        title: draft.title, slug: draft.slug || slugify(draft.title),
-        excerpt: draft.excerpt, content: draft.content,
-        coverImage: draft.coverImage, category: draft.category,
-        published: draft.published, publishedAt: draft.publishedAt || null,
+        title: draft.title,
+        slug,
+        excerpt: draft.excerpt,
+        content: draft.content,
+        coverImage: draft.coverImage,
+        category: draft.category,
+        published: draft.published,
+        publishedAt,
       };
       if (editing) await apiCall("PATCH", `/api/cms/news/${editing.id}`, payload);
       else await apiCall("POST", "/api/cms/news", payload);
