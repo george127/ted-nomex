@@ -34,9 +34,7 @@ export function Header() {
 
   const onLogout = async () => {
     setOpen(false);
-    await logout();
-    router.push("/");
-    router.refresh();
+    await logout(); window.location.href = "/";
   };
 
   const displayName = user?.name ?? user?.email ?? "";

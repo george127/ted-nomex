@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -36,9 +36,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   }
 
   const handleLogout = async () => {
-    await logout();
-    router.push("/login");
-    router.refresh();
+    await logout(); window.location.href = "/login";
   };
 
   return (

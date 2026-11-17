@@ -29,9 +29,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   }
 
   const handleLogout = async () => {
-    await logout();
-    router.push("/login");
-    router.refresh();
+    await logout(); window.location.href = "/login";
   };
 
   return (

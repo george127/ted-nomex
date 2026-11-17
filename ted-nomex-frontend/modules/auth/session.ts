@@ -110,6 +110,15 @@ export async function logout(): Promise<void> {
       credentials: "include",
     });
   } catch {}
+
+  // Belt-and-braces clear in case CORS swallowed the Set-Cookie header
+  if (typeof document !== "undefined") {
+    document.cookie =
+      "ted_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; SameSite=None; Secure";
+    document.cookie =
+      "ted_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Max-Age=0; SameSite=Lax";
+  }
+
   notifyAuthChanged();
 }
 
