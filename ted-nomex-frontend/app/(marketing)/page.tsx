@@ -1,4 +1,6 @@
-import { Suspense } from "react";
+"use client";
+
+import { Suspense, useState } from "react";
 import { IMAGES } from "@/lib/assets";
 import Link from "next/link";
 import { HeroSlider } from "@/components/marketing/HeroSlider";
@@ -6,6 +8,7 @@ import { ServicesGrid } from "@/components/marketing/ServicesGrid";
 import { ProjectsGrid } from "@/components/marketing/ProjectsGrid";
 import { Counters } from "@/components/marketing/Counter";
 import "@/styles/home.css";
+import "@/styles/projects.css";
 import { AboutSection } from "@/components/marketing/AboutSection";
 import { WhyChooseUs } from "@/components/marketing/WhyChooseUs";
 
@@ -15,21 +18,8 @@ function ServicesSkeleton() {
       {[1, 2, 3].map((i) => (
         <div key={i} className="service-list" style={{ opacity: 0.4 }}>
           <div className="collection">
-            <div
-              style={{
-                height: 40,
-                width: 40,
-                background: "#eee",
-                marginBottom: 16,
-              }}
-            />
-            <div
-              style={{
-                height: 20,
-                background: "#eee",
-                marginBottom: 8,
-              }}
-            />
+            <div style={{ height: 40, width: 40, background: "#eee", marginBottom: 16 }} />
+            <div style={{ height: 20, background: "#eee", marginBottom: 8 }} />
             <div style={{ height: 14, background: "#eee", width: "80%" }} />
           </div>
         </div>
@@ -53,6 +43,8 @@ function ProjectsSkeleton() {
 }
 
 export default function HomePage() {
+  const [videoOpen, setVideoOpen] = useState(false);
+
   return (
     <>
       <HeroSlider />
@@ -106,7 +98,7 @@ export default function HomePage() {
       {/* About */}
       <AboutSection />
 
-      {/* Projects (Dark Slider) */}
+      {/* Projects */}
       <div className="projects-container Text-Item">
         <div className="container">
           <div className="projects-header-row">
@@ -181,13 +173,18 @@ export default function HomePage() {
                     <img src={IMAGES.aboutHero} alt="" />
                     <div className="image">
                       <div className="play-container">
-                        <div className="play">
+                        <button
+                          type="button"
+                          className="play"
+                          onClick={() => setVideoOpen(true)}
+                          aria-label="Play company video"
+                        >
                           <p>
                             <span className="material-symbols-outlined">
                               play_arrow
                             </span>
                           </p>
-                        </div>
+                        </button>
                         <p>video about our company</p>
                       </div>
                     </div>
@@ -211,6 +208,34 @@ export default function HomePage() {
       <br />
       <br />
       <br />
+
+      {/* Video Modal */}
+      {videoOpen && (
+        <div
+          className="video-modal-overlay"
+          onClick={() => setVideoOpen(false)}
+        >
+          <div className="video-modal" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="video-modal-close"
+              onClick={() => setVideoOpen(false)}
+              aria-label="Close video"
+            >
+              <span className="material-symbols-outlined">close</span>
+            </button>
+            <video
+              className="video-modal-player"
+              controls
+              autoPlay
+              playsInline
+            >
+              <source src="/videos/company.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        </div>
+      )}
     </>
   );
 }
