@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { IMAGES } from "@/lib/assets";
 import Link from "next/link";
 import { HeroSlider } from "@/components/marketing/HeroSlider";
@@ -8,6 +9,48 @@ import "@/styles/home.css";
 import { AboutSection } from "@/components/marketing/AboutSection";
 import { WhyChooseUs } from "@/components/marketing/WhyChooseUs";
 
+function ServicesSkeleton() {
+  return (
+    <div className="services-items">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="service-list" style={{ opacity: 0.4 }}>
+          <div className="collection">
+            <div
+              style={{
+                height: 40,
+                width: 40,
+                background: "#eee",
+                marginBottom: 16,
+              }}
+            />
+            <div
+              style={{
+                height: 20,
+                background: "#eee",
+                marginBottom: 8,
+              }}
+            />
+            <div style={{ height: 14, background: "#eee", width: "80%" }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ProjectsSkeleton() {
+  return (
+    <div className="projects-grid">
+      {[1, 2, 3, 4].map((i) => (
+        <div
+          key={i}
+          className="project-card"
+          style={{ opacity: 0.4, height: 340, background: "#1a1a1a" }}
+        />
+      ))}
+    </div>
+  );
+}
 
 export default function HomePage() {
   return (
@@ -30,22 +73,35 @@ export default function HomePage() {
         <div className="background"></div>
         <img src={IMAGES.servicesBg} alt="img" className="image" />
         <div className="container">
-          <br /><br />
+          <br />
+          <br />
           <div className="text-description">
             <div className="description">
               <p>What We Do</p>
-              <h3>We Offer Smarter &amp; More Affordable Access To Construction Services and Equipment. We Are Ted-Nomex</h3>
+              <h3>
+                We Offer Smarter &amp; More Affordable Access To Construction
+                Services and Equipment. We Are Ted-Nomex
+              </h3>
             </div>
             <div className="description">
-              <p>At Ted-Nomex, we provide comprehensive construction services and top-notch equipment rentals to streamline your projects. Our goal is to make construction accessible and hassle-free for everyone.</p>
+              <p>
+                At Ted-Nomex, we provide comprehensive construction services and
+                top-notch equipment rentals to streamline your projects. Our goal
+                is to make construction accessible and hassle-free for everyone.
+              </p>
             </div>
           </div>
-          <br /><br />
-          <ServicesGrid />
+          <br />
+          <br />
+          <Suspense fallback={<ServicesSkeleton />}>
+            <ServicesGrid />
+          </Suspense>
         </div>
-        <br /><br /><br /><br />
+        <br />
+        <br />
+        <br />
+        <br />
       </div>
-
 
       {/* About */}
       <AboutSection />
@@ -56,14 +112,23 @@ export default function HomePage() {
           <div className="projects-header-row">
             <div className="projects-header-text">
               <h2>Our latest projects</h2>
-              <p>At Ted-Nomex Construction Company, we are proud to showcase some of our most recent projects that highlight our expertise, innovation, and commitment to excellence. Here are a few of our latest achievements:</p>
-              <Link href="/projects" className="btn-view-all">View all projects</Link>
+              <p>
+                At Ted-Nomex Construction Company, we are proud to showcase some
+                of our most recent projects that highlight our expertise,
+                innovation, and commitment to excellence. Here are a few of our
+                latest achievements:
+              </p>
+              <Link href="/projects" className="btn-view-all">
+                View all projects
+              </Link>
             </div>
           </div>
         </div>
-        
+
         <div className="projects-slider-container">
-          <ProjectsGrid />
+          <Suspense fallback={<ProjectsSkeleton />}>
+            <ProjectsGrid />
+          </Suspense>
         </div>
       </div>
 
@@ -81,7 +146,11 @@ export default function HomePage() {
                   <h2>leading way in building and civil construction!</h2>
                 </div>
                 <div className="item">
-                  <p>We actively participate in local projects and support initiatives that contribute to the development and well-being of the communities we serve.</p>
+                  <p>
+                    We actively participate in local projects and support
+                    initiatives that contribute to the development and
+                    well-being of the communities we serve.
+                  </p>
                   <div className="line-container">
                     <div className="line1"></div>
                     <div className="line2"></div>
@@ -93,10 +162,16 @@ export default function HomePage() {
                   <div className="text-container">
                     <p>more about us</p>
                     <h2>12 Years of Quality and Successful Projects</h2>
-                    <p>For over 12 years, Ted-Nomex Construction Company has been at the forefront of the construction industry, delivering projects that exemplify quality, innovation, and success.</p>
+                    <p>
+                      For over 12 years, Ted-Nomex Construction Company has been
+                      at the forefront of the construction industry, delivering
+                      projects that exemplify quality, innovation, and success.
+                    </p>
                     <div className="btn-container">
                       <Link href="/contact" className="Btn">
-                        <span className="material-symbols-outlined">chevron_right</span>
+                        <span className="material-symbols-outlined">
+                          chevron_right
+                        </span>
                         <p>request a quote</p>
                       </Link>
                     </div>
@@ -107,7 +182,11 @@ export default function HomePage() {
                     <div className="image">
                       <div className="play-container">
                         <div className="play">
-                          <p><span className="material-symbols-outlined">play_arrow</span></p>
+                          <p>
+                            <span className="material-symbols-outlined">
+                              play_arrow
+                            </span>
+                          </p>
                         </div>
                         <p>video about our company</p>
                       </div>
@@ -128,7 +207,10 @@ export default function HomePage() {
         </div>
       </div>
 
-      <br /><br /><br /><br />
+      <br />
+      <br />
+      <br />
+      <br />
     </>
   );
 }
