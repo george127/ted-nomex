@@ -29,11 +29,9 @@
     "google-auth-library": "^11.3.3",
     "jsonwebtoken": "^9.0.3",
     "prisma": "^6.19.3",
-    "resend": "^6.37.0",
     "stripe": "^23.1.0",
     "tsx": "^4.23.15",
     "typescript": "^5.7.2",
     "zod": "^4.6.7"
-  },
-  "devDependencies": {}
+  }
 }

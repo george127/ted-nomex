@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Added by remove-resend
+.env
+.env.local
+.env.*.local
+resend-*-report.txt

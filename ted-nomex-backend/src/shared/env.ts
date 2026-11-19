@@ -1,4 +1,4 @@
-// src/shared/env.ts
+﻿// src/shared/env.ts
 import { config } from "dotenv";
 import { z } from "zod";
 
@@ -19,8 +19,6 @@ const schema = z.object({
 
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
-
-  RESEND_API_KEY: z.string().optional(),
   EMAIL_FROM: z.string().optional(),
 
   CLOUDINARY_CLOUD_NAME: z.string().optional(),
@@ -37,7 +35,7 @@ const schema = z.object({
 const parsed = schema.safeParse(process.env);
 
 if (!parsed.success) {
-  console.error("❌ Invalid environment variables:\n");
+  console.error("âŒ Invalid environment variables:\n");
   console.error(parsed.error.flatten().fieldErrors);
   process.exit(1);
 }
