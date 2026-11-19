@@ -11,6 +11,6 @@ type SendParams = {
 
 export async function sendEmail(params: SendParams): Promise<void> {
   const from = env.EMAIL_FROM ?? "Ted-Nomex <noreply@ted-nomex.com>";
-  logger.info([EMAIL] to= + params.to +  from= + from +  subject=" + params.subject + ");
+  logger.info(`[EMAIL] to=${params.to} from=${from} subject="${params.subject}"`);
   logger.debug(params.text ?? params.html);
 }
